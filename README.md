@@ -16,7 +16,7 @@ The project is a about a high precision calculator that is only limited through 
 There are 3 types of operation you can make:
 * Add (positive integers)
 * Subtract (positive integers)
-* Multiply (two integers values)
+* Multiply (two integer values)
 
 HOW TO PLACE VALUES
 --------------------------------------------------
