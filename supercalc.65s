@@ -1,0 +1,352 @@
+; Trabalho de Organizacao de Computadores Digitais - SSC0511 -  Prof. FERNANDO OSORIO  - monitor: Andre Perina
+; NOME: Wesley Tiozzo
+; nUSP: 8077925
+; Super Calculadora - Assembly 6502
+
+
+	.ORG $300
+
+; rotina de escolha de operacoes	
+menu:
+	LDA operation	
+		
+	CMP #$01
+	BEQ soma
+	
+	CMP #$02
+	BEQ subtraction
+	
+	CMP #$03
+	BEQ multiplication
+	JMP menu
+	
+; Loops para evitar erro de endereco relativo (relative address out of range)
+multiplication:
+	JMP multiply
+subtraction: 
+	JMP subtracao
+	
+; rotina de soma	
+soma:	
+	; zera registradores e acumulador
+	LDX #$00		; indice de ambos operandos (vetores)
+	LDY #$00		; indice do resultado
+	LDA #$00
+	
+	CLC
+	
+percorre_vetor_soma:		; soma valor do vetor 1 com vetor 2 e armazena em resultado
+	LDA V1, X
+	ADC V2, X
+	STA Resultado, Y
+	
+	INY			; caminha ou incrementa indice de resultado
+	INX			; caminha ou incrementa indice de ambos operandos				
+	
+compara_final_soma:
+	CPX Tam			; se o valor de TAM for igual ao valor do indice dos vetores, a soma foi bem sucedida
+	BEQ verifica_soma
+	
+	JMP percorre_vetor_soma
+	
+verifica_soma:
+	LDX #$00
+        LDY #$00
+        LDA #$00		; coloca 0 no contador de verificao dos valores de resultado
+        
+        STA cont_soma
+        
+              
+verifica_soma_2:        	; rotina de tratamento de elementos maiores ou igual a 10
+	SEC
+	SED			;seta carry para modo decimal
+        LDA Resultado, y
+        
+        CMP #00
+        BEQ proximo_valor_soma
+        
+        CMP #01
+        BEQ proximo_valor_soma
+        
+        CMP #02
+        BEQ proximo_valor_soma
+        
+        CMP #03
+        BEQ proximo_valor_soma
+        
+        CMP #04
+        BEQ proximo_valor_soma
+        
+        CMP #05
+        BEQ proximo_valor_soma
+        
+        CMP #06
+        BEQ proximo_valor_soma
+        
+        CMP #07
+        BEQ proximo_valor_soma
+        
+        CMP #08
+        BEQ proximo_valor_soma
+        
+        CMP #09
+        BEQ proximo_valor_soma
+             
+verifica_digito_soma_maior10:	; se caso o elemento for maior ou igual a 10
+        SBC #$0A		; subtrai 10 do valor que eh maior do que 10 em hexadecimal
+        STA Resultado, y
+        
+        INY
+        CLC
+        LDA Resultado, y
+        ADC #$01	      ; soma 1 ao valor "convertido"
+        STA Resultado, y
+        
+        INC cont_soma
+        JMP verificao_final_soma
+                         
+proximo_valor_soma:        
+	INY 		      ; incrementa indice do vetor de resultados
+	     
+verificao_final_soma:
+        LDA cont_soma
+        CMP Tam
+        BEQ fim_soma
+        
+        INC cont_soma
+        JMP verifica_soma_2
+             
+fim_soma:
+        BRK   
+
+; rotina de subtracao	
+subtracao:
+	; zera registradores e acumulador
+	LDA #$00
+	LDX #$00	      ; indice de ambos operandos (vetores)
+	LDY #$00              ; indice do resultado
+	
+	CLC
+	
+percorre_vetor_sub:	      ; subtrai valor do vetor 1 com vetor 2 e armazena em resultado
+	LDA V1, X
+	SEC
+	SBC V2, X
+	STA Resultado, Y
+	
+	INY		      ; caminha ou incrementa indice de resultado
+	INX	              ; caminha ou incrementa indice de ambos operandos
+	
+compara_final_sub:
+	CPX Tam		; se o valor de TAM for igual ao valor do indice dos vetores, a subtracao foi bem sucedida
+	BEQ fim_sub
+	
+	JMP percorre_vetor_sub
+	
+fim_sub:
+	BRK
+	
+;rotina de multiplicacao
+multiply:  
+	;zera registradores e acumulador
+	LDX #$00
+        LDY #$00     
+	LDA #$00
+        
+        STA cont_vet1          ; contador de elementos do vetor 1
+        STA cont_sum_multi     ; contador de somas sucessivas do vetor 1
+             
+multiply_start:
+       LDA #$00
+       STA Resultado, y
+       
+       LDA cont_vet1	       	; condicao final, se o numero de elementos do vetor for igual ao tamanho total do vetor, multiplicacao bem sucedida
+       CMP Tam
+       BEQ end_of_multiplication
+       
+       LDA #$00
+       STA cont_sum_multi
+             
+multiply_loop_1:  
+       LDA V1, x
+       LDA cont_sum_multi
+       CMP times     		; constata quantas vezes o vetor1 foi somado para saber se vai para o proximo valor
+       BEQ multiply_loop_2
+       
+       CLC
+       LDA Resultado, y
+       ADC V1, x		; soma resultado com valor do vetor1 e salva no vetor de resultados
+       STA Resultado, y   
+       
+       INC cont_sum_multi	; conta o numero de somas
+       JMP multiply_loop_1             
+             
+multiply_loop_2:		; incremento dos vetores
+       INY            		
+       INX             		
+       INC cont_vet1   		
+       
+       JMP multiply_start 
+             
+end_of_multiplication:  
+      LDX #$00
+      LDY #$00
+      LDA #$00
+      
+      JMP adjust_elements  
+
+adjust_elements:
+      STA cont_sum_multi        
+      STA cont_vet1    		
+      STA cont_iteration_mult   
+             
+adjust_loop_1:
+      LDA #$00
+      STA cont_sum_multi
+      
+      LDA cont_iteration_mult
+      CMP Tam			; se o numero de somas sucessivas for igual ao tamanho do vetor1, 
+      BEQ end
+             
+      LDA Resultado, x
+      STA cont_vet1
+                       
+adjust_loop_sub_10:		
+      LDA cont_vet1
+      CLC
+      SEC
+      SBC #$0A			; subtrai valor 10 do valor de vetor1 que foi armazenado em cont_vet1
+      STA cont_vet1
+      
+      LDA cont_vet1
+      CMP #00
+      BMI adjust_negative	; se o valor for negativo, soma 10 a ele
+      BEQ adjust_negative	
+      
+      
+      INC cont_sum_multi
+      JMP adjust_loop_sub_10
+                         
+adjust_negative:
+      LDA cont_vet1
+      SEC
+      CLC
+      ADC #$0A			 ; soma 10 ao numero negativo
+      STA cont_vet1
+      STA Resultado, x
+      
+      INX
+      LDA Resultado, x
+      CLC
+      ADC cont_sum_multi
+      STA Resultado, x
+      
+      INC cont_iteration_mult
+      JMP adjust_loop_1                                         
+
+end: 
+      BRK
+	
+	
+	
+	
+	
+	
+	
+	
+; Contadores	
+
+cont_soma .DB $00     		; contador para a rotina de soma
+         
+cont_sum_multi .DB $00 		; contador de somas sucessivas do vetor 1 para a multiplicacao
+
+cont_vet1    .DB  $00  		; contador de elementos do vetor 1 usado na rotina de multiplicaco
+
+cont_iteration_mult .DB $00	; contador de valores ou elementos do vetor 1 para a multiplicacao
+
+
+
+
+; Vetores e Opcoes
+
+times    .DB  $05   		; NUMERO QUE DESEJA MULTIPLICAR (rotina de multiplicacao)
+
+
+
+
+	     .ORG $0FFE
+	
+Tam .DB $05 			; TAMANHO DOS VETORES (quantidade de digitos (operandos A e B))
+
+
+
+
+	     .ORG $0FFF
+	
+operation .DB $03		; TIPO DE OPERACAO: 1 - soma, 2 - subtracao, 3 - multiplicacao
+
+
+
+
+	      .ORG $3000
+    			
+Resultado    .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0	; resultado da operacao 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+		
+	     .ORG $1000
+	
+V1 	     .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0	; VETOR1 OU OPERANDO A [256]
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
+	     .ORG $2000
+	
+V2 	     .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0	; VETOR2 OU OPERANDO B 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 
+             .DB  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
+	     
+	
+
+
+	
