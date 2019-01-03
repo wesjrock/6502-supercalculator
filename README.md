@@ -26,7 +26,7 @@ The result will be stored inside an array called `Resultado`.
 HOW TO ASSEMBLE
 --------------------------------------------------
 ```bash
-	1. Download the 6502 simulator (This version is Windows only)
+	1. Extract the 6502 simulator zip file (This version is Windows only)
 	2. Load the code
 	3. Assemble it (F6)
 	4. Run it (F5)
@@ -35,4 +35,4 @@ HOW TO ASSEMBLE
 
 MORE INFO
 --------------------------------------------------
-* Please check the file `project specification` to know more about this project.
+* Please check the file `project specification.pdf` to know more about this project.
