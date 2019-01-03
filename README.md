@@ -8,7 +8,7 @@ The purpose of this project was to implement a high precision calculator in 6502
 WHAT IS 6502 ASSEMBLY?
 --------------------------------------------------
 6502 Assembly was used to write programs for the Atari 2600, Apple II, Commodore 64 and Nintendo Entertainment System.
-It has only two index-registers (X and Y) and the accumulator (A).
+It has two index-registers (X and Y) and an accumulator (A).
 
 PROJECT
 --------------------------------------------------
