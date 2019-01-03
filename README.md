@@ -12,7 +12,7 @@ It has two index-registers (X and Y) and an accumulator (A).
 
 PROJECT
 --------------------------------------------------
-The project is a about a high precision calculator that is only limited through the amount of memory.
+The project is about a high precision calculator that is only limited through the amount of memory.
 There are 3 types of operation you can make:
 * Add (positive integers)
 * Subtract (positive integers)
