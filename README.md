@@ -32,6 +32,10 @@ HOW TO ASSEMBLE
 	4. Run it (F5)
 	5. Click on the View tab to select what you want to see (Memory/Stack/Registers)
 ```
+CREDITS
+--------------------------------------------------
+- Renato José Alves da Silva
+- Wesley Tiozzo
 
 MORE INFO
 --------------------------------------------------
